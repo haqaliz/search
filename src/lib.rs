@@ -1,6 +1,7 @@
 use std::env;
 use std::error::Error;
 use std::fs;
+use std::collections::HashMap;
 
 #[macro_use]
 extern crate colour;
@@ -49,14 +50,19 @@ pub fn run(params: Params) -> Result<(), Box<dyn Error>> {
         let results = search(&params.query, &contents);
 
         for line in results {
-            let line_content = line.split(&params.query).collect::<Vec<&str>>();
+            let line_content = line.1.split(&params.query).collect::<Vec<&str>>();
+            let mut highlighted_before: bool = false;
+
+            blue!("{}: ", line.0);
 
             for (i, item) in line_content.iter().enumerate() {
                 if item.is_empty() {
+                    red!("{}", &params.query);
+                    highlighted_before = true;
                     continue;
                 }
 
-                if i > 0 && i < line_content.len() {
+                if highlighted_before == false && i > 0 && i < line_content.len() {
                     red!("{}", &params.query);
                 }
 
@@ -70,9 +76,19 @@ pub fn run(params: Params) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    contents
-        .lines()
-        .filter(|line| line.contains(query))
-        .collect()
+pub fn search<'a>(query: &str, contents: &'a str) -> HashMap<String, String> {
+    let mut lines = HashMap::new();
+
+    for (i, line) in contents.lines().enumerate() {
+        if !line.contains(query) {
+            continue;
+        }
+
+        lines.insert(
+            (i + 1).to_string(),
+            line.to_string(),
+        );
+    }
+
+    lines
 }
