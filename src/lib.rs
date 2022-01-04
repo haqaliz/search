@@ -1,7 +1,6 @@
 use std::env;
 use std::error::Error;
 use std::fs;
-use std::collections::HashMap;
 use regex::Regex;
 
 #[macro_use]
@@ -84,19 +83,22 @@ pub fn run(params: Params) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn search<'a>(re: &Regex, contents: &'a str) -> HashMap<String, String> {
-    let mut lines = HashMap::new();
+pub fn search<'a>(re: &Regex, contents: &'a str) -> Vec<(usize, String)> {
+    let mut lines = Vec::new();
 
     for (i, line) in contents.lines().enumerate() {
         if !re.is_match(line) {
             continue;
         }
 
-        lines.insert(
-            (i + 1).to_string(),
+        lines.push((
+            i + 1,
             line.to_string(),
-        );
+        ));
+
     }
+
+    lines.sort_by_key(|i| i.0);
 
     lines
 }
