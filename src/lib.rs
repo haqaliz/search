@@ -43,8 +43,12 @@ impl Params {
 }
 
 pub fn run(params: Params) -> Result<(), Box<dyn Error>> {
-    for file in params.files {
-        green_ln!("{}:", file);
+    let mut files = params.files;
+
+    files.sort();
+
+    for file in files {
+        magenta_ln!("{}", file);
 
         let contents = fs::read_to_string(file)?;
         let re = Regex::new(&params.query).unwrap();
@@ -57,7 +61,7 @@ pub fn run(params: Params) -> Result<(), Box<dyn Error>> {
                 .collect::<Vec<&str>>();
             let mut highlighted_before: bool = false;
 
-            blue!("{}: ", line.0);
+            green!("{}: ", line.0);
 
             for (i, item) in line_content.iter().enumerate() {
                 let ii = if i == 0 { 0 } else { i - 1 };
